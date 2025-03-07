@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "9000:9000"   # TCP port for ClickHouse native client
+      - "8124:8123"   # HTTP interface
+    environment:
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=test
+    volumes:
+      - ./pkg/db/clickhouse.sql:/docker-entrypoint-initdb.d/clickhouse.sql:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: worker
+    environment:
+      - CLICKHOUSE_HOSTS=clickhouse:9000
+      - CLICKHOUSE_DATABASE=adszero
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=test
+      - SIMPLEWORKER_TICK_INTERVAL=5
+      # see .env.example for additional reference
+    depends_on:
+      clickhouse:
+        condition: service_healthy
