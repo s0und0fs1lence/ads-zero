@@ -77,7 +77,7 @@ func TestMailClient(t *testing.T) {
 	if err := message.From("toni@tester.com"); err != nil {
 		t.Fatalf("failed to set FROM address: %s", err)
 	}
-	if err := message.To("goncear97@gmail.com"); err != nil {
+	if err := message.To("test@gmail.com"); err != nil {
 		t.Fatalf("failed to set TO address: %s", err)
 	}
 	f, err := os.ReadFile("/workspaces/ads-zero/pkg/worker/template.html")
